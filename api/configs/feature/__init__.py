@@ -386,6 +386,20 @@ class OAuthConfig(BaseSettings):
         default=None,
     )
 
+    MICROSOFT_ENTRA_TENANT_ID: Optional[str] = Field(
+        description='Microsoft Entra ID tenant id for OAuth',
+        default=None,
+    )
+
+    MICROSOFT_ENTRA_CLIENT_ID: Optional[str] = Field(
+        description='Microsoft Entra ID client id for OAuth',
+        default=None,
+    )
+
+    MICROSOFT_ENTRA_CLIENT_SECRET: Optional[str] = Field(
+        description='Microsoft Entra ID client secret key for OAuth',
+        default=None,
+    )
 
 class ModerationConfig(BaseSettings):
     """

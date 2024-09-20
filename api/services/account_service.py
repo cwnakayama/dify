@@ -485,6 +485,11 @@ class TenantService:
         tenant = db.session.query(Tenant).filter(Tenant.id == tenant_id).one_or_404()
 
         return tenant.custom_config_dict
+    
+    @staticmethod
+    def get_first_tenant_for_ce() -> Tenant:
+        """Get the first and only created tenant for Community Edition"""
+        return db.session.query(Tenant).order_by(Tenant.created_at.asc()).first()
 
 
 class RegisterService:

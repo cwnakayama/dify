@@ -10,7 +10,7 @@ from configs import dify_config
 from constants.languages import languages
 from extensions.ext_database import db
 from libs.helper import get_remote_ip
-from libs.oauth import GitHubOAuth, GoogleOAuth, OAuthUserInfo
+from libs.oauth import GitHubOAuth, GoogleOAuth, MicrosoftEntraOAuth, OAuthUserInfo
 from models.account import Account, AccountStatus
 from services.account_service import AccountService, RegisterService, TenantService
 
@@ -35,8 +35,17 @@ def get_oauth_providers():
                 client_secret=dify_config.GOOGLE_CLIENT_SECRET,
                 redirect_uri=dify_config.CONSOLE_API_URL + "/console/api/oauth/authorize/google",
             )
+        if not dify_config.MICROSOFT_ENTRA_TENANT_ID or not dify_config.MICROSOFT_ENTRA_CLIENT_ID or not dify_config.MICROSOFT_ENTRA_CLIENT_SECRET:
+            microsoft_entra_oauth = None
+        else:
+            microsoft_entra_oauth = MicrosoftEntraOAuth(
+                tenant_id=dify_config.MICROSOFT_ENTRA_TENANT_ID,
+                client_id=dify_config.MICROSOFT_ENTRA_CLIENT_ID,
+                client_secret=dify_config.MICROSOFT_ENTRA_CLIENT_SECRET,
+                redirect_uri=dify_config.CONSOLE_API_URL + '/console/api/oauth/authorize/microsoft_entra',
+            )
 
-        OAUTH_PROVIDERS = {"github": github_oauth, "google": google_oauth}
+        OAUTH_PROVIDERS = {"github": github_oauth, "google": google_oauth, 'microsoft_entra': microsoft_entra_oauth}
         return OAUTH_PROVIDERS
 
 
@@ -79,7 +88,11 @@ class OAuthCallback(Resource):
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db.session.commit()
 
-        TenantService.create_owner_tenant_if_not_exist(account)
+        if dify_config.EDITION == 'SELF_HOSTED':
+            ce_tenant = TenantService.get_first_tenant_for_ce()
+            TenantService.create_tenant_member(ce_tenant, account)
+        else:
+            TenantService.create_owner_tenant_if_not_exist(account)
 
         token = AccountService.login(account, ip_address=get_remote_ip(request))
 

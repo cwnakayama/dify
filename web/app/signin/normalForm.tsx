@@ -16,10 +16,11 @@ type IState = {
   formValid: boolean
   github: boolean
   google: boolean
+  microsoft_entra: boolean
 }
 
 type IAction = {
-  type: 'login' | 'login_failed' | 'github_login' | 'github_login_failed' | 'google_login' | 'google_login_failed'
+  type: 'login' | 'login_failed' | 'github_login' | 'github_login_failed' | 'google_login' | 'google_login_failed'| 'microsoft_entra_login' | 'microsoft_entra_login_failed'
 }
 
 function reducer(state: IState, action: IAction) {
@@ -54,6 +55,16 @@ function reducer(state: IState, action: IAction) {
         ...state,
         google: false,
       }
+    case 'microsoft_entra_login':
+      return {
+        ...state,
+        microsoft_entra: true,
+      }
+    case 'microsoft_entra_login_failed':
+      return {
+        ...state,
+        microsoft_entra: false,
+      }
     default:
       throw new Error('Unknown action.')
   }
@@ -62,6 +73,7 @@ function reducer(state: IState, action: IAction) {
 const NormalForm = () => {
   const { t } = useTranslation()
   const useEmailLogin = IS_CE_EDITION || SUPPORT_MAIL_LOGIN
+  const useMicrosoftEntraLogin = true
 
   const router = useRouter()
 
@@ -69,6 +81,7 @@ const NormalForm = () => {
     formValid: false,
     github: false,
     google: false,
+    microsoft_entra: false,
   })
 
   const [showPassword, setShowPassword] = useState(false)
@@ -127,6 +140,15 @@ const NormalForm = () => {
       // },
     })
     : null, oauth)
+  
+  const { data: microsoft_entra, error: microsoft_entra_error } = useSWR(state.microsoft_entra
+    ? ({
+      url: '/oauth/login/microsoft_entra',
+      // params: {
+      //   provider: 'microsoft_entra',
+      // },
+    })
+    : null, oauth)
 
   useEffect(() => {
     if (github_error !== undefined)
@@ -141,6 +163,13 @@ const NormalForm = () => {
     if (google)
       window.location.href = google.redirect_url
   }, [google, google_error])
+
+  useEffect(() => {
+    if (microsoft_entra_error !== undefined)
+      dispatch({ type: 'microsoft_entra_login_failed' })
+    if (microsoft_entra)
+      window.location.href = microsoft_entra.redirect_url
+  })
 
   return (
     <>
@@ -266,6 +295,34 @@ const NormalForm = () => {
               </form>
             </>
           }
+          
+          {useMicrosoftEntraLogin && (
+            <div className="flex flex-col gap-3 mt-4 mb-5">
+              <div className='w-full'>
+                <div className='text-center text-sm text-gray-900 font-semibold'>{t('login.or')}</div>
+              </div>
+              <div className='w-full'>
+                <a href={getPurifyHref(`${apiPrefix}/oauth/login/microsoft_entra`)}>
+                  <Button
+                    disabled={isLoading}
+                    className='w-full hover:!bg-gray-50'
+                  >
+                    <>
+                      <span className={
+                        classNames(
+                          style.microsoftEntraIcon,
+                          'w-5 h-5 mr-2',
+                        )
+                      } />
+                      <span className="truncate text-gray-800">{t('login.withMicrosoftEntra')}</span>
+                    </>
+                  </Button>
+                </a>
+              </div>
+            </div>
+          )}
+
+
           {/*  agree to our Terms and Privacy Policy. */}
           <div className="w-hull text-center block mt-2 text-xs text-gray-600">
             {t('login.tosDesc')}

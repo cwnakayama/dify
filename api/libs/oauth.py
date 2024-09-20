@@ -32,6 +32,55 @@ class OAuth:
 
     def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
         raise NotImplementedError()
+    
+    class MicrosoftEntraOAuth(OAuth):
+    def __init__(self, tenant_id: str, client_id: str, client_secret: str, redirect_uri: str):
+        self.tenant_id = tenant_id
+        super().__init__(client_id, client_secret, redirect_uri)
+
+        self._AUTH_URL = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
+        self._TOKEN_URL = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
+        self._USER_INFO_URL = "https://graph.microsoft.com/v1.0/me"
+
+    def get_authorization_url(self):
+        params = {
+            "client_id": self.client_id,
+            "response_type": "code",
+            "redirect_uri": self.redirect_uri,
+            "scope": "profile openid email",
+        }
+        return f"{self._AUTH_URL}?{urllib.parse.urlencode(params)}"
+
+    def get_access_token(self, code: str):
+        data = {
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": self.redirect_uri,
+        }
+        headers = {"Accept": "application/json"}
+        response = requests.post(self._TOKEN_URL, data=data, headers=headers)
+
+        response_json = response.json()
+        access_token = response_json.get("access_token")
+
+        if not access_token:
+            raise ValueError(f"Error in Microsoft Entra ID OAuth: {response_json}")
+
+        return access_token
+
+    def get_raw_user_info(self, token: str):
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(self._USER_INFO_URL, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
+    def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
+        email = raw_info.get("mail") or raw_info.get("userPrincipalName")
+        if not email:
+            email = f"{raw_info['id']}@me-id.example" # email is required for creating account
+        return OAuthUserInfo(id=str(raw_info["id"]), name=raw_info["displayName"], email=email)
 
 
 class GitHubOAuth(OAuth):

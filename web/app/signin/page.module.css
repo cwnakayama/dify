@@ -6,6 +6,10 @@
   background: center/contain url('./assets/google.svg');
 }
 
+.microsoftEntraIcon {
+  background: center/contain url('./assets/microsoft_entra.svg');
+}
+
 .background {
   background-image: url('./assets/background.png');
   background-size: cover;

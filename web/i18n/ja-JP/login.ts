@@ -26,6 +26,8 @@ const translation = {
   reset: 'パスワードをリセットするには、次のコマンドを実行してください',
   withGitHub: 'GitHubで続行',
   withGoogle: 'Googleで続行',
+  withMicrosoftEntra: 'Microsoft Entra ID でログイン',
+  or: 'または',
   rightTitle: 'LLMのフルポテンシャルを解き放つ',
   rightDesc: '魅力的で操作可能で改善可能なAIアプリケーションを簡単に構築します。',
   tos: '利用規約',
