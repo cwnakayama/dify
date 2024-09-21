@@ -33,7 +33,7 @@ class OAuth:
     def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
         raise NotImplementedError()
     
-    class MicrosoftEntraOAuth(OAuth):
+class MicrosoftEntraOAuth(OAuth):
     def __init__(self, tenant_id: str, client_id: str, client_secret: str, redirect_uri: str):
         self.tenant_id = tenant_id
         super().__init__(client_id, client_secret, redirect_uri)

@@ -18,6 +18,12 @@ from .. import api
 
 
 def get_oauth_providers():
+
+    print(f"dify_config.MICROSOFT_ENTRA_TENANT_ID: {dify_config.MICROSOFT_ENTRA_TENANT_ID}")
+    print(f"dify_config.MICROSOFT_ENTRA_CLIENT_ID: {dify_config.MICROSOFT_ENTRA_CLIENT_ID}")
+    print(f"dify_config.MICROSOFT_ENTRA_CLIENT_SECRET: {dify_config.MICROSOFT_ENTRA_CLIENT_SECRET}")
+    print(f"dify_config.CONSOLE_API_URL: {dify_config.CONSOLE_API_URL}")
+
     with current_app.app_context():
         if not dify_config.GITHUB_CLIENT_ID or not dify_config.GITHUB_CLIENT_SECRET:
             github_oauth = None
@@ -42,7 +48,7 @@ def get_oauth_providers():
                 tenant_id=dify_config.MICROSOFT_ENTRA_TENANT_ID,
                 client_id=dify_config.MICROSOFT_ENTRA_CLIENT_ID,
                 client_secret=dify_config.MICROSOFT_ENTRA_CLIENT_SECRET,
-                redirect_uri=dify_config.CONSOLE_API_URL + '/console/api/oauth/authorize/microsoft_entra',
+                redirect_uri='http://localhost:5001/console/api/oauth/authorize/microsoft_entra',
             )
 
         OAUTH_PROVIDERS = {"github": github_oauth, "google": google_oauth, 'microsoft_entra': microsoft_entra_oauth}
@@ -54,7 +60,10 @@ class OAuthLogin(Resource):
         OAUTH_PROVIDERS = get_oauth_providers()
         with current_app.app_context():
             oauth_provider = OAUTH_PROVIDERS.get(provider)
-            print(vars(oauth_provider))
+            #print(vars(oauth_provider))
+            print(f"Type of oauth_provider: {type(oauth_provider)}")
+            print(f"Attributes of oauth_provider: {dir(oauth_provider)}")
+            print(oauth_provider.__dict__ if hasattr(oauth_provider, '__dict__') else "No __dict__ attribute")
         if not oauth_provider:
             return {"error": "Invalid provider"}, 400
 
