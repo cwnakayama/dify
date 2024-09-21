@@ -33,6 +33,7 @@ class OAuth:
     def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
         raise NotImplementedError()
     
+
 class MicrosoftEntraOAuth(OAuth):
     def __init__(self, tenant_id: str, client_id: str, client_secret: str, redirect_uri: str):
         self.tenant_id = tenant_id
@@ -79,7 +80,7 @@ class MicrosoftEntraOAuth(OAuth):
     def _transform_user_info(self, raw_info: dict) -> OAuthUserInfo:
         email = raw_info.get("mail") or raw_info.get("userPrincipalName")
         if not email:
-            email = f"{raw_info['id']}@me-id.example" # email is required for creating account
+            email = f"{raw_info['id']}@me-id.example"  # email is required for creating account
         return OAuthUserInfo(id=str(raw_info["id"]), name=raw_info["displayName"], email=email)
 
 

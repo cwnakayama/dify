@@ -41,14 +41,18 @@ def get_oauth_providers():
                 client_secret=dify_config.GOOGLE_CLIENT_SECRET,
                 redirect_uri=dify_config.CONSOLE_API_URL + "/console/api/oauth/authorize/google",
             )
-        if not dify_config.MICROSOFT_ENTRA_TENANT_ID or not dify_config.MICROSOFT_ENTRA_CLIENT_ID or not dify_config.MICROSOFT_ENTRA_CLIENT_SECRET:
+        if (
+            not dify_config.MICROSOFT_ENTRA_TENANT_ID
+            or not dify_config.MICROSOFT_ENTRA_CLIENT_ID
+            or not dify_config.MICROSOFT_ENTRA_CLIENT_SECRET
+        ):
             microsoft_entra_oauth = None
         else:
             microsoft_entra_oauth = MicrosoftEntraOAuth(
                 tenant_id=dify_config.MICROSOFT_ENTRA_TENANT_ID,
                 client_id=dify_config.MICROSOFT_ENTRA_CLIENT_ID,
                 client_secret=dify_config.MICROSOFT_ENTRA_CLIENT_SECRET,
-                redirect_uri='http://localhost:5001/console/api/oauth/authorize/microsoft_entra',
+                redirect_uri=dify_config.CONSOLE_API_URL + '/console/api/oauth/authorize/microsoft_entra',
             )
 
         OAUTH_PROVIDERS = {"github": github_oauth, "google": google_oauth, 'microsoft_entra': microsoft_entra_oauth}
@@ -60,7 +64,7 @@ class OAuthLogin(Resource):
         OAUTH_PROVIDERS = get_oauth_providers()
         with current_app.app_context():
             oauth_provider = OAUTH_PROVIDERS.get(provider)
-            #print(vars(oauth_provider))
+            # print(vars(oauth_provider))
             print(f"Type of oauth_provider: {type(oauth_provider)}")
             print(f"Attributes of oauth_provider: {dir(oauth_provider)}")
             print(oauth_provider.__dict__ if hasattr(oauth_provider, '__dict__') else "No __dict__ attribute")

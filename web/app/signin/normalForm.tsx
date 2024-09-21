@@ -20,7 +20,7 @@ type IState = {
 }
 
 type IAction = {
-  type: 'login' | 'login_failed' | 'github_login' | 'github_login_failed' | 'google_login' | 'google_login_failed'| 'microsoft_entra_login' | 'microsoft_entra_login_failed'
+  type: 'login' | 'login_failed' | 'github_login' | 'github_login_failed' | 'google_login' | 'google_login_failed' | 'microsoft_entra_login' | 'microsoft_entra_login_failed'
 }
 
 function reducer(state: IState, action: IAction) {
@@ -140,7 +140,7 @@ const NormalForm = () => {
       // },
     })
     : null, oauth)
-  
+
   const { data: microsoft_entra, error: microsoft_entra_error } = useSWR(state.microsoft_entra
     ? ({
       url: '/oauth/login/microsoft_entra',
@@ -297,7 +297,7 @@ const NormalForm = () => {
               </form>
             </>
           }
-          
+
           {useMicrosoftEntraLogin && (
             <div className="flex flex-col gap-3 mt-4 mb-5">
               <div className='w-full'>
@@ -323,7 +323,6 @@ const NormalForm = () => {
               </div>
             </div>
           )}
-
 
           {/*  agree to our Terms and Privacy Policy. */}
           <div className="w-hull text-center block mt-2 text-xs text-gray-600">

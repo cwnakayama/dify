@@ -401,6 +401,7 @@ class OAuthConfig(BaseSettings):
         default=None,
     )
 
+
 class ModerationConfig(BaseSettings):
     """
     Moderation in app configs.
