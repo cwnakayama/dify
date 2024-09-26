@@ -101,11 +101,12 @@ class OAuthCallback(Resource):
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db.session.commit()
 
-        if dify_config.EDITION == 'SELF_HOSTED':
-            ce_tenant = TenantService.get_first_tenant_for_ce()
-            TenantService.create_tenant_member(ce_tenant, account)
-        else:
-            TenantService.create_owner_tenant_if_not_exist(account)
+        # if dify_config.EDITION == 'SELF_HOSTED':
+        #     ce_tenant = TenantService.get_first_tenant_for_ce()
+        #     TenantService.create_tenant_member(ce_tenant, account)
+        # else:
+        #     TenantService.create_owner_tenant_if_not_exist(account)
+        TenantService.create_owner_tenant_if_not_exist(account)
 
         token = AccountService.login(account, ip_address=get_remote_ip(request))
 
