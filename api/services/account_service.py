@@ -286,15 +286,29 @@ class TenantService:
     @staticmethod
     def create_tenant_member(tenant: Tenant, account: Account, role: str = "normal") -> TenantAccountJoin:
         """Create tenant member"""
-        if role == TenantAccountJoinRole.OWNER.value:
-            if TenantService.has_roles(tenant, [TenantAccountJoinRole.OWNER]):
-                logging.error(f"Tenant {tenant.id} has already an owner.")
-                raise Exception("Tenant already has an owner.")
+        try:
+            existing_ta = TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
+            if existing_ta:
+                logging.info(f"アカウント {account.id} は既にテナント {tenant.id} のメンバーです。")
+                return existing_ta
 
-        ta = TenantAccountJoin(tenant_id=tenant.id, account_id=account.id, role=role)
-        db.session.add(ta)
-        db.session.commit()
-        return ta
+            if role == TenantAccountJoinRole.OWNER.value:
+                if TenantService.has_roles(tenant, [TenantAccountJoinRole.OWNER]):
+                    logging.error(f"Tenant {tenant.id} has already an owner.")
+                    raise Exception("Tenant already has an owner.")
+
+            ta = TenantAccountJoin(tenant_id=tenant.id, account_id=account.id, role=role)
+            db.session.add(ta)
+            db.session.commit()
+            return ta
+        except IntegrityError:
+            db.session.rollback()
+            logging.warning(f"アカウント {account.id} のテナント {tenant.id} への追加中に一意性制約違反が発生しました。")
+            return TenantAccountJoin.query.filter_by(tenant_id=tenant.id, account_id=account.id).first()
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"テナントメンバーの作成中に予期せぬエラーが発生しました: {str(e)}")
+            raise
 
     @staticmethod
     def get_join_tenants(account: Account) -> list[Tenant]:

@@ -19,11 +19,6 @@ from .. import api
 
 def get_oauth_providers():
 
-    print(f"dify_config.MICROSOFT_ENTRA_TENANT_ID: {dify_config.MICROSOFT_ENTRA_TENANT_ID}")
-    print(f"dify_config.MICROSOFT_ENTRA_CLIENT_ID: {dify_config.MICROSOFT_ENTRA_CLIENT_ID}")
-    print(f"dify_config.MICROSOFT_ENTRA_CLIENT_SECRET: {dify_config.MICROSOFT_ENTRA_CLIENT_SECRET}")
-    print(f"dify_config.CONSOLE_API_URL: {dify_config.CONSOLE_API_URL}")
-
     with current_app.app_context():
         if not dify_config.GITHUB_CLIENT_ID or not dify_config.GITHUB_CLIENT_SECRET:
             github_oauth = None
@@ -52,6 +47,7 @@ def get_oauth_providers():
                 tenant_id=dify_config.MICROSOFT_ENTRA_TENANT_ID,
                 client_id=dify_config.MICROSOFT_ENTRA_CLIENT_ID,
                 client_secret=dify_config.MICROSOFT_ENTRA_CLIENT_SECRET,
+                # redirect_uri='http://localhost/console/api/oauth/authorize/microsoft_entra',
                 redirect_uri=dify_config.CONSOLE_API_URL + '/console/api/oauth/authorize/microsoft_entra',
             )
 
@@ -101,12 +97,12 @@ class OAuthCallback(Resource):
             account.initialized_at = datetime.now(timezone.utc).replace(tzinfo=None)
             db.session.commit()
 
-        # if dify_config.EDITION == 'SELF_HOSTED':
-        #     ce_tenant = TenantService.get_first_tenant_for_ce()
-        #     TenantService.create_tenant_member(ce_tenant, account)
-        # else:
-        #     TenantService.create_owner_tenant_if_not_exist(account)
-        TenantService.create_owner_tenant_if_not_exist(account)
+        if dify_config.EDITION == 'SELF_HOSTED':
+            ce_tenant = TenantService.get_first_tenant_for_ce()
+            TenantService.create_tenant_member(ce_tenant, account)
+        else:
+            TenantService.create_owner_tenant_if_not_exist(account)
+        # TenantService.create_owner_tenant_if_not_exist(account)
 
         token = AccountService.login(account, ip_address=get_remote_ip(request))
 
