@@ -207,16 +207,13 @@ x-shared-env: &shared-api-worker-env
   WORKFLOW_CALL_MAX_DEPTH: ${WORKFLOW_MAX_EXECUTION_TIME:-5}
   SSRF_PROXY_HTTP_URL: ${SSRF_PROXY_HTTP_URL:-http://ssrf_proxy:3128}
   SSRF_PROXY_HTTPS_URL: ${SSRF_PROXY_HTTPS_URL:-http://ssrf_proxy:3128}
-  MICROSOFT_ENTRA_TENANT_ID: ${MICROSOFT_ENTRA_TENANT_ID:-}
-  MICROSOFT_ENTRA_CLIENT_ID: ${MICROSOFT_ENTRA_CLIENT_ID:-}
-  MICROSOFT_ENTRA_CLIENT_SECRET: ${MICROSOFT_ENTRA_CLIENT_SECRET:-}
   HTTP_REQUEST_NODE_MAX_BINARY_SIZE: ${HTTP_REQUEST_NODE_MAX_BINARY_SIZE:-10485760}
   HTTP_REQUEST_NODE_MAX_TEXT_SIZE: ${HTTP_REQUEST_NODE_MAX_TEXT_SIZE:-1048576}
 
 services:
   # API service
   api:
-    image: dify-api-custom:latest
+    image: langgenius/dify-api:0.9.1
     restart: always
     environment:
       # Use the shared environment variables.
@@ -236,7 +233,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: dify-api-custom:latest
+    image: langgenius/dify-api:0.9.1
     restart: always
     environment:
       # Use the shared environment variables.
@@ -255,7 +252,7 @@ services:
 
   # Frontend web application.
   web:
-    image: dify-web-custom:latest
+    image: langgenius/dify-web:0.9.1
     restart: always
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
